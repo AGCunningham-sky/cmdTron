@@ -15,7 +15,6 @@ import (
 type player struct {
 	Player []sprite
 	Direction string
-	Lives int
 }
 
 type sprite struct {
@@ -24,18 +23,18 @@ type sprite struct {
 	here 	bool
 }
 
-var maze []string
-var PlayerA player
-var PlayerB player
-var maxLength = 150
-var exit bool
+var (
+	maze []string
+	PlayerA player
+	PlayerB player
+	maxLength = 150
+	exit bool
+)
 
 func main() {
 	initialise()
 	defer cleanup()
 
-	PlayerA.Lives = 1
-	PlayerB.Lives = 1
 	exit = false
 
 	err := loadMaze("maze.txt")
@@ -58,29 +57,22 @@ func main() {
 
 	for {
 		printScreen()
+
 		var crash bool
-		PlayerA, crash = playerMovement(PlayerA)
-		if crash {
-			PlayerA.Lives--
+		if PlayerA, crash = playerMovement(PlayerA); crash {
 			color.Blue("WASD Wins")
 			break
 		}
-		PlayerB, crash = playerMovement(PlayerB)
-		if crash {
-			PlayerB.Lives--
+		if PlayerB, crash = playerMovement(PlayerB); crash {
 			color.Red("Arrows Wins")
 			break
 		}
 
-		crash = collisionDetection(PlayerA, PlayerB.Player[0])
-		if crash {
-			PlayerB.Lives--
+		if collisionDetection(PlayerA, PlayerB.Player[0]) {
 			color.Red("Arrows Wins")
 			break
 		}
-		crash = collisionDetection(PlayerB, PlayerA.Player[0])
-		if crash {
-			PlayerA.Lives--
+		if collisionDetection(PlayerB, PlayerA.Player[0]) {
 			color.Blue("WASD Wins")
 			break
 		}
