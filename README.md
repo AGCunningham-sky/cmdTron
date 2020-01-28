@@ -5,8 +5,8 @@ Old School Tron, but for Terminal
 *NB.* Doesn't work in IntelliJ terminal, must be run in Terminal using `go run main.go`
 
 - The game is over when a player hits their own tail or crashed into an opponents
-- The arrow keys control character 'a' RED
-- 'WASD' keys control character 'b' BLUE
+- The arrow keys control character 'a' (RED tail)
+- 'WASD' keys control character 'b' (BLUE tail)
 
 If you wish to exit prematurely press 'ESC'
 
