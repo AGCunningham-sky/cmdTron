@@ -28,6 +28,7 @@ var maze []string
 var PlayerA player
 var PlayerB player
 var maxLength = 150
+var exit bool
 
 func main() {
 	initialise()
@@ -35,6 +36,7 @@ func main() {
 
 	PlayerA.Lives = 1
 	PlayerB.Lives = 1
+	exit = false
 
 	err := loadMaze("maze.txt")
 	if err != nil {
@@ -86,10 +88,14 @@ func main() {
 		select {
 		case inp := <-input:
 			if inp == "ESC" {
-				PlayerA.Lives = 0
+				color.Cyan("Game exited")
+				exit = true
 			}
 			PlayerA, PlayerB = snakeMovement(PlayerA, PlayerB, inp)
 		default:
+		}
+		if exit {
+			break
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
