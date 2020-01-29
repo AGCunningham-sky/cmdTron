@@ -7,6 +7,7 @@ import (
 	"github.com/danicat/simpleansi"
 	"golang.org/x/net/websocket"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"time"
@@ -78,20 +79,20 @@ func main() {
 		}
 	}(input)
 
+	updates := make(chan Message)
 	// receive
-	var m Message
-	go func() {
+	go func(ch chan<- Message) {
 		for {
+			var m Message
 			err := websocket.JSON.Receive(ws, &m)
+			log.Println("rec", m)
 			if err != nil {
 				fmt.Println("Error receiving message: ", err.Error())
 				break
 			}
-			fmt.Println("Message: ", m)
-			PlayerA = m.PlayerA
-			PlayerB = m.PlayerB
+			ch <- m
 		}
-	}()
+	}(updates)
 
 	for {
 		printScreen()
@@ -111,6 +112,9 @@ func main() {
 				fmt.Println("Error sending message: ", err.Error())
 				break
 			}
+			case m:= <- updates:
+				PlayerA = m.PlayerA
+				PlayerB = m.PlayerB
 		default:
 		}
 		if exit {
@@ -133,6 +137,32 @@ func mockedIP() string {
 		arr[i] = rand.Intn(256)
 	}
 	return fmt.Sprintf("http://%d.%d.%d.%d", arr[0], arr[1], arr[2], arr[3])
+}
+
+func loadMaze(file string) error {
+	f, err := os.Open(file)
+	if err != nil{
+		return err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		maze = append(maze, scanner.Text())
+	}
+
+	for row, line := range maze {
+		for col, chr := range line {
+			switch chr {
+			case 'a':
+				PlayerA.Player = append(PlayerA.Player, sprite{row, col, true})
+			case 'b':
+				PlayerB.Player = append(PlayerB.Player, sprite{row, col, true})
+			}
+		}
+	}
+
+	return nil
 }
 
 func readInput() (string, error) {
