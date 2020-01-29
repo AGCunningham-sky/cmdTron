@@ -56,31 +56,27 @@ func main() {
 	log.Fatal(server(*port))
 }
 
-func updateLogic(PlayerA, PlayerB bike, inp string) (crash bool, Player1, Player2 bike){
-	// Update the direction
-	Player1, Player2 = playerDirection(PlayerA, PlayerB, inp)
-
-	// Calculate Movement
-	if PlayerA, crash = playerMovement(PlayerA); crash {
+func updateLogic(pA, pB bike) bool {
+	var crash bool
+	if PlayerA, crash = playerMovement(pA); crash {
 		color.Blue("WASD Wins")
-		return
+		return true
 	}
-	if PlayerB, crash = playerMovement(PlayerB); crash {
+	if PlayerB, crash = playerMovement(pB); crash {
 		color.Red("Arrows Wins")
-		return
+		return true
 	}
 
-	// Calculate winners
-	if collisionDetection(PlayerA, PlayerB.Player[0]) {
+	if collisionDetection(pA, pB.Player[0]) {
 		color.Red("Arrows Wins")
-		return
+		return true
 	}
-	if collisionDetection(PlayerB, PlayerA.Player[0]) {
+	if collisionDetection(pB, pA.Player[0]) {
 		color.Blue("WASD Wins")
-		return
+		return true
 	}
 
-	return
+	return false
 }
 
 // server creates a websocket server at port <port> and registers the sole handler
@@ -112,10 +108,12 @@ func handler(ws *websocket.Conn, h *hub) {
 			h.removeClient(ws)
 			return
 		}
+
 		//TODO: Currently it doesn't matter who send the command bceause you still use wasd v arrows
-		crash, PlayerA, PlayerB = updateLogic(PlayerA, PlayerB, m.Command)
+		playerDirection(m.Command)
+
+		crash = updateLogic(PlayerA, PlayerB)
 		if !crash {
-			log.Println("updated A", PlayerA, "   Updated B", PlayerB)
 			h.broadcastChan <- Message{PlayerA:PlayerA, PlayerB:PlayerB}
 		} else {
 			log.Println("CRASH")
@@ -207,27 +205,25 @@ func collisionDetection(user bike, opp sprite) bool {
 	return false
 }
 
-func playerDirection(user1, user2 bike, input string) (bike, bike) {
+func playerDirection(input string) {
 	switch input {
 	case "UP":
-		user1.Direction = "UP"
+		PlayerA.Direction = "UP"
 	case "DOWN":
-		user1.Direction = "DOWN"
+		PlayerA.Direction = "DOWN"
 	case "RIGHT":
-		user1.Direction = "LEFT"
+		PlayerA.Direction = "LEFT"
 	case "LEFT":
-		user1.Direction = "RIGHT"
+		PlayerA.Direction = "RIGHT"
 	case "w":
-		user2.Direction = "UP"
+		PlayerB.Direction = "UP"
 	case "s":
-		user2.Direction = "DOWN"
+		PlayerB.Direction = "DOWN"
 	case "d":
-		user2.Direction = "LEFT"
+		PlayerB.Direction = "LEFT"
 	case "a":
-		user2.Direction = "RIGHT"
+		PlayerB.Direction = "RIGHT"
 	}
-
-	return user1, user2
 }
 
 func playerMovement(Player bike) (bike, bool) {

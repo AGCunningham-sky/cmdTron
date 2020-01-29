@@ -85,7 +85,6 @@ func main() {
 		for {
 			var m Message
 			err := websocket.JSON.Receive(ws, &m)
-			log.Println("rec", m)
 			if err != nil {
 				fmt.Println("Error receiving message: ", err.Error())
 				break
@@ -120,7 +119,7 @@ func main() {
 		if exit {
 			break
 		}
-		time.Sleep(1250 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
