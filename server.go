@@ -12,24 +12,24 @@ import (
 	"github.com/fatih/color"
 )
 
-type player struct {
+type bike struct {
 	Player []sprite
 	Direction string
 }
 
 type sprite struct {
-	row 	int
-	col 	int
-	here 	bool
+	Row  int
+	Col  int
+	Here bool
 }
 
 type Message struct {
-	PlayerA 	player `json:"playerA"`
-	PlayerB 	player `json:"playerB"`
+	PlayerA bike `json:"playerA"`
+	PlayerB bike `json:"playerB"`
 }
 
 type inComing struct {
-	Player	string `json:"player"`
+	Player	string `json:"bike"`
 	Command string	`json:"command"`
 }
 
@@ -41,9 +41,9 @@ type hub struct {
 }
 
 var (
-	maze []string
-	PlayerA player
-	PlayerB player
+	maze      []string
+	PlayerA   bike
+	PlayerB   bike
 	maxLength = 150
 
 	port = flag.String("port", "9000", "port used for ws connection")
@@ -56,7 +56,7 @@ func main() {
 	log.Fatal(server(*port))
 }
 
-func updateLogic(PlayerA, PlayerB player, inp string) (crash bool, Player1, Player2 player){
+func updateLogic(PlayerA, PlayerB bike, inp string) (crash bool, Player1, Player2 bike){
 	// Update the direction
 	Player1, Player2 = playerDirection(PlayerA, PlayerB, inp)
 
@@ -195,7 +195,7 @@ func loadMaze(file string) error {
 	return nil
 }
 
-func collisionDetection(user player, opp sprite) bool {
+func collisionDetection(user bike, opp sprite) bool {
 	for ind, seg := range user.Player {
 		if ind != 0 {
 			if seg == opp {
@@ -207,7 +207,7 @@ func collisionDetection(user player, opp sprite) bool {
 	return false
 }
 
-func playerDirection(user1, user2 player, input string) (player, player) {
+func playerDirection(user1, user2 bike, input string) (bike, bike) {
 	switch input {
 	case "UP":
 		user1.Direction = "UP"
@@ -230,17 +230,17 @@ func playerDirection(user1, user2 player, input string) (player, player) {
 	return user1, user2
 }
 
-func playerMovement(Player player) (player, bool) {
+func playerMovement(Player bike) (bike, bool) {
 	if Player.Direction != "" {
 		var newRow sprite
 
 		switch Player.Direction {
-		case "UP": newRow = sprite{Player.Player[0].row - 1, Player.Player[0].col, true}
-		case "DOWN": newRow = sprite{Player.Player[0].row + 1, Player.Player[0].col, true}
-		case "LEFT": newRow = sprite{Player.Player[0].row, Player.Player[0].col + 1, true}
-		case "RIGHT": newRow = sprite{Player.Player[0].row, Player.Player[0].col - 1, true}
+		case "UP": newRow = sprite{Player.Player[0].Row - 1, Player.Player[0].Col, true}
+		case "DOWN": newRow = sprite{Player.Player[0].Row + 1, Player.Player[0].Col, true}
+		case "LEFT": newRow = sprite{Player.Player[0].Row, Player.Player[0].Col + 1, true}
+		case "RIGHT": newRow = sprite{Player.Player[0].Row, Player.Player[0].Col - 1, true}
 		}
-		if newRow.here != false {
+		if newRow.Here != false {
 			Player.Player = append([]sprite{newRow}, Player.Player...)
 		}
 
@@ -248,15 +248,15 @@ func playerMovement(Player player) (player, bool) {
 			Player.Player = Player.Player[:len(Player.Player)-1]
 		}
 
-		if Player.Player[0].row >= len(maze)-1 {
-			Player.Player[0].row = 1
-		} else if Player.Player[0].row <= 0 {
-			Player.Player[0].row = len(maze)-2
+		if Player.Player[0].Row >= len(maze)-1 {
+			Player.Player[0].Row = 1
+		} else if Player.Player[0].Row <= 0 {
+			Player.Player[0].Row = len(maze)-2
 		}
-		if Player.Player[0].col > len(maze[0])-1 {
-			Player.Player[0].col = 0
-		} else if Player.Player[0].col < 0 {
-			Player.Player[0].col = len(maze[0])
+		if Player.Player[0].Col > len(maze[0])-1 {
+			Player.Player[0].Col = 0
+		} else if Player.Player[0].Col < 0 {
+			Player.Player[0].Col = len(maze[0])
 		}
 
 		for ind, seg := range Player.Player {

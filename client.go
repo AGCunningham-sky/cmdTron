@@ -15,35 +15,35 @@ import (
 	"github.com/fatih/color"
 )
 
-type player struct {
+type bike struct {
 	Player []sprite
 	Direction string
 }
 
 type sprite struct {
-	row 	int
-	col 	int
-	here 	bool
+	Row  int
+	Col  int
+	Here bool
 }
 
 type Message struct {
-	PlayerA 	player `json:"playerA"`
-	PlayerB 	player `json:"playerB"`
+	PlayerA bike `json:"playerA"`
+	PlayerB bike `json:"playerB"`
 }
 
 type inComing struct {
-	Player	string `json:"player"`
+	Player	string `json:"bike"`
 	Command string	`json:"command"`
 }
 
 var (
-	maze []string
-	PlayerA player
-	PlayerB player
+	maze      []string
+	PlayerA   bike
+	PlayerB   bike
 	maxLength = 150
-	exit bool
-	port = flag.String("port", "9000", "port used for ws connection")
-	serverIP = "10.190.159.32"
+	exit      bool
+	port      = flag.String("port", "9000", "port used for ws connection")
+	serverIP  = "10.190.159.32"
 )
 
 func main() {
@@ -120,7 +120,7 @@ func main() {
 		if exit {
 			break
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1250 * time.Millisecond)
 	}
 }
 
@@ -221,11 +221,11 @@ func printScreen() {
 	}
 
 	for _,segment := range PlayerA.Player {
-		simpleansi.MoveCursor(segment.row, segment.col)
+		simpleansi.MoveCursor(segment.Row, segment.Col)
 		color.Red("a")
 	}
 	for _,segment := range PlayerB.Player {
-		simpleansi.MoveCursor(segment.row, segment.col)
+		simpleansi.MoveCursor(segment.Row, segment.Col)
 		color.Blue("b")
 	}
 
