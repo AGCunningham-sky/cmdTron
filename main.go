@@ -83,7 +83,7 @@ func main() {
 				color.Cyan("Game exited")
 				exit = true
 			}
-			PlayerA, PlayerB = snakeMovement(PlayerA, PlayerB, inp)
+			PlayerA, PlayerB = playerDirection(PlayerA, PlayerB, inp)
 		default:
 		}
 		if exit {
@@ -146,7 +146,7 @@ func readInput() (string, error) {
 	return "", nil
 }
 
-func snakeMovement(user1, user2 player, input string) (player, player) {
+func playerDirection(user1, user2 player, input string) (player, player) {
 	switch input {
 	case "UP":
 		user1.Direction = "UP"
@@ -171,20 +171,15 @@ func snakeMovement(user1, user2 player, input string) (player, player) {
 
 func playerMovement(Player player) (player, bool) {
 	if Player.Direction != "" {
-		if Player.Direction == "UP" {
-			newRow := sprite{Player.Player[0].row - 1, Player.Player[0].col, true}
-			Player.Player = append([]sprite{newRow}, Player.Player...)
+		var newRow sprite
+
+		switch Player.Direction {
+		case "UP": newRow = sprite{Player.Player[0].row - 1, Player.Player[0].col, true}
+		case "DOWN": newRow = sprite{Player.Player[0].row + 1, Player.Player[0].col, true}
+		case "LEFT": newRow = sprite{Player.Player[0].row, Player.Player[0].col + 1, true}
+		case "RIGHT": newRow = sprite{Player.Player[0].row, Player.Player[0].col - 1, true}
 		}
-		if Player.Direction == "DOWN" {
-			newRow := sprite{Player.Player[0].row + 1, Player.Player[0].col, true}
-			Player.Player = append([]sprite{newRow}, Player.Player...)
-		}
-		if Player.Direction == "LEFT" {
-			newRow := sprite{Player.Player[0].row, Player.Player[0].col + 1, true}
-			Player.Player = append([]sprite{newRow}, Player.Player...)
-		}
-		if Player.Direction == "RIGHT" {
-			newRow := sprite{Player.Player[0].row, Player.Player[0].col - 1, true}
+		if newRow.here != false {
 			Player.Player = append([]sprite{newRow}, Player.Player...)
 		}
 
@@ -192,10 +187,10 @@ func playerMovement(Player player) (player, bool) {
 			Player.Player = Player.Player[:len(Player.Player)-1]
 		}
 
-		if Player.Player[0].row >= len(maze)-2 {
+		if Player.Player[0].row >= len(maze)-1 {
 			Player.Player[0].row = 1
 		} else if Player.Player[0].row <= 0 {
-			Player.Player[0].row = len(maze) - 2
+			Player.Player[0].row = len(maze)-2
 		}
 		if Player.Player[0].col > len(maze[0])-1 {
 			Player.Player[0].col = 0
