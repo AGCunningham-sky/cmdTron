@@ -48,7 +48,7 @@ var (
 	maxLength = 150
 	exit      bool
 	port      = flag.String("port", "9000", "port used for ws connection")
-	serverIP  = "10.190.159.32"
+	serverIP  = ""
 )
 
 type hub struct {
@@ -210,8 +210,8 @@ func main() {
 			fmt.Println("Joined host: "+serverIP+". Enter any value to begin.")
 			fmt.Scan(&host)
 		} else {
-			hostIP := GetOutboundIP()
-			fmt.Println("Host IP is: ", hostIP)
+			serverIP = string(GetOutboundIP())
+			fmt.Println("Host IP is: ", serverIP)
 			fmt.Println("Enter any value to begin.")
 			fmt.Scan(&host)
 		}
