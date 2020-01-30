@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/websocket"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -179,19 +180,47 @@ func handler(ws *websocket.Conn, h *hub) {
 }
 
 func main() {
-	initialise()
-	defer cleanup()
+	// Start server (required for both local & networked play)
+	go func() {
+		flag.Parse()
+		log.Fatal(server(*port))
+	}()
 
+	// Load the Maze
 	err := loadMaze("maze.txt")
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
 
-	go func() {
-		flag.Parse()
-		log.Fatal(server(*port))
-	}()
+	var mode string
+	fmt.Println("-- Welcome to Tron --")
+	fmt.Println("Enter '1' for local play or '2' for networked play")
+	fmt.Scan(&mode)
+
+	switch mode {
+	case "1":
+	case "2":
+		fmt.Println("Press '1' to host or any key to join")
+		var host string
+		fmt.Scan(&host)
+		if host != "1" {
+			fmt.Println("Enter Host IP")
+			fmt.Scan(&serverIP)
+		} else {
+			hostIP := GetOutboundIP()
+			fmt.Println("Host IP is: ", hostIP)
+			fmt.Println("Enter any value to begin.")
+			fmt.Scan(&host)
+		}
+
+	default:
+		fmt.Println("Invalid option. Goodbye.")
+		os.Exit(0)
+	}
+
+	initialise()
+	defer cleanup()
 
 	flag.Parse()
 
@@ -472,4 +501,17 @@ func playerMovement(Player bike) (bike, bool) {
 		}
 	}
 	return Player, false
+}
+
+// Get preferred outbound ip of this machine
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
 }
