@@ -207,6 +207,8 @@ func main() {
 		if host != "1" {
 			fmt.Println("Enter Host IP")
 			fmt.Scan(&serverIP)
+			fmt.Println("Joined host: "+serverIP+". Enter any value to begin.")
+			fmt.Scan(&host)
 		} else {
 			hostIP := GetOutboundIP()
 			fmt.Println("Host IP is: ", hostIP)
