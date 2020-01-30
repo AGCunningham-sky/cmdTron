@@ -129,10 +129,10 @@ func handler(ws *websocket.Conn, h *hub) {
 		if crash {
 			switch winner {
 			case "Arrows":
-				ServerA.Lives--
+				ServerB.Lives--
 				gameReset()
 			case "WASD":
-				ServerB.Lives--
+				ServerA.Lives--
 				gameReset()
 			default:
 			}
