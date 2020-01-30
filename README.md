@@ -2,7 +2,7 @@
 Old School Tron, but for Terminal
 
 # To Play
-*NB.* Doesn't work in IntelliJ terminal, must be run in Terminal using `go run client.go`
+*NB.* Doesn't work in IntelliJ terminal, must be run in Terminal using `go run *.go`
 
 - There are options to play locally or across a network (ensure you are on the same subnet prior to attempting networking multiplayer)
 - If you are hosting a game the `hostIP` will be output and this can then be used to join
