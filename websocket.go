@@ -139,9 +139,9 @@ func handler(ws *websocket.Conn, h *hub) {
 		}
 
 		if ServerA.Lives <= 0 {
-			ServerA.Winner = true
-		} else if ServerB.Lives <= 0 {
 			ServerB.Winner = true
+		} else if ServerB.Lives <= 0 {
+			ServerA.Winner = true
 		}
 
 		h.broadcastChan <- serverToClients{ServerA, ServerB}
