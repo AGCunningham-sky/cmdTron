@@ -1,13 +1,13 @@
 package main
 
 import (
-"fmt"
-"golang.org/x/net/websocket"
-"log"
-"math/rand"
-"net"
-"net/http"
-"time"
+	"fmt"
+	"golang.org/x/net/websocket"
+	"log"
+	"math/rand"
+	"net"
+	"net/http"
+	"time"
 )
 
 // get preferred outbound ip of this machine
@@ -150,9 +150,9 @@ func handler(ws *websocket.Conn, h *hub) {
 }
 
 func gameReset() {
-	ServerA.Player = initA
-	ServerA.Direction = ""
+	ServerA.BikeTrail = initA
+	ServerA.BikeDirection = ""
 
-	ServerB.Player = initB
-	ServerB.Direction = ""
+	ServerB.BikeTrail = initB
+	ServerB.BikeDirection = ""
 }

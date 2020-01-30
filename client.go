@@ -25,8 +25,8 @@ func main() {
 			os.Exit(1)
 		}
 
-		initA = ServerA.Player
-		initB = ServerB.Player
+		initA = ServerA.BikeTrail
+		initB = ServerB.BikeTrail
 
 		flag.Parse()
 		log.Fatal(server(*port))
@@ -54,7 +54,6 @@ func main() {
 			fmt.Println("Enter any value to begin.")
 			fmt.Scan(&host)
 		}
-
 	default:
 		fmt.Println("Invalid option. Goodbye.")
 		cleanup()
@@ -117,8 +116,8 @@ func main() {
 				break
 			}
 		case m:= <- updates:
-			PlayerA = m.PlayerA
-			PlayerB = m.PlayerB
+			PlayerA = m.ServA
+			PlayerB = m.ServB
 
 			// Only redraw the screen when the data is updated
 			printScreen()
@@ -154,10 +153,10 @@ func loadMaze(file string) error {
 		for col, chr := range line {
 			switch chr {
 			case 'a':
-				PlayerA.Player = append(PlayerA.Player, sprite{row, col, true})
+				PlayerA.BikeTrail = append(PlayerA.BikeTrail, sprite{row, col, true})
 				ServerA = PlayerA
 			case 'b':
-				PlayerB.Player = append(PlayerB.Player, sprite{row, col, true})
+				PlayerB.BikeTrail = append(PlayerB.BikeTrail, sprite{row, col, true})
 				ServerB = PlayerB
 			}
 		}

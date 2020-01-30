@@ -7,10 +7,10 @@ import (
 
 var (
 	maze         []string
-	PlayerB      bike
 	PlayerA      bike
-	ServerB      bike
+	PlayerB      bike
 	ServerA      bike
+	ServerB      bike
 	initA		 []sprite
 	initB 		 []sprite
 	maxLength    = 150
@@ -22,10 +22,10 @@ var (
 )
 
 type bike struct {
-	Player 		[]sprite
-	Direction 	string
-	Winner		bool
-	Lives		int
+	BikeTrail     []sprite
+	BikeDirection string
+	Winner        bool
+	Lives         int
 }
 
 type sprite struct {
@@ -35,9 +35,8 @@ type sprite struct {
 }
 
 type serverToClients struct {
-	//TODO: Figure out why I couldn't change this
-	PlayerA bike
-	PlayerB bike
+	ServA bike
+	ServB bike
 }
 
 type clientToServer struct {

@@ -17,10 +17,10 @@ func updateLogic(pA, pB bike) (bool, string) {
 		return true, "Arrows"
 	}
 
-	if collisionDetection(pA, pB.Player[0]) {
+	if collisionDetection(pA, pB.BikeTrail[0]) {
 		return true, "Arrows"
 	}
-	if collisionDetection(pB, pA.Player[0]) {
+	if collisionDetection(pB, pA.BikeTrail[0]) {
 		return true, "WASD"
 	}
 
@@ -29,7 +29,7 @@ func updateLogic(pA, pB bike) (bool, string) {
 
 // determine collisions per player
 func collisionDetection(user bike, opp sprite) bool {
-	for ind, seg := range user.Player {
+	for ind, seg := range user.BikeTrail {
 		if ind != 0 {
 			if seg == opp {
 				return true
@@ -42,37 +42,39 @@ func collisionDetection(user bike, opp sprite) bool {
 
 // updates player movement per player
 func playerMovement(Player bike) (bike, bool) {
-	if Player.Direction != "" {
+	if Player.BikeDirection != "" {
 		var newRow sprite
 
-		switch Player.Direction {
-		case "UP": newRow = sprite{Player.Player[0].Row - 1, Player.Player[0].Col, true}
-		case "DOWN": newRow = sprite{Player.Player[0].Row + 1, Player.Player[0].Col, true}
-		case "LEFT": newRow = sprite{Player.Player[0].Row, Player.Player[0].Col + 1, true}
-		case "RIGHT": newRow = sprite{Player.Player[0].Row, Player.Player[0].Col - 1, true}
+		x, y := Player.BikeTrail[0].Col, Player.BikeTrail[0].Row
+		switch Player.BikeDirection {
+			case "UP": y--
+			case "DOWN": y++
+			case "LEFT": x--
+			case "RIGHT": x++
 		}
-		if newRow.Here != false {
-			Player.Player = append([]sprite{newRow}, Player.Player...)
-		}
-
-		if len(Player.Player) > maxLength {
-			Player.Player = Player.Player[:len(Player.Player)-1]
+		if x != Player.BikeTrail[0].Col || y != Player.BikeTrail[0].Row  {
+			newRow = sprite{y, x, true}
+			Player.BikeTrail = append([]sprite{newRow}, Player.BikeTrail...)
 		}
 
-		if Player.Player[0].Row >= len(maze)-1 {
-			Player.Player[0].Row = 1
-		} else if Player.Player[0].Row <= 0 {
-			Player.Player[0].Row = len(maze)-2
-		}
-		if Player.Player[0].Col > len(maze[0])-1 {
-			Player.Player[0].Col = 0
-		} else if Player.Player[0].Col < 0 {
-			Player.Player[0].Col = len(maze[0])
+		if len(Player.BikeTrail) > maxLength {
+			Player.BikeTrail = Player.BikeTrail[:len(Player.BikeTrail)-1]
 		}
 
-		for ind, seg := range Player.Player {
+		if Player.BikeTrail[0].Row >= len(maze)-1 {
+			Player.BikeTrail[0].Row = 1
+		} else if Player.BikeTrail[0].Row <= 0 {
+			Player.BikeTrail[0].Row = len(maze)-2
+		}
+		if Player.BikeTrail[0].Col > len(maze[0])-1 {
+			Player.BikeTrail[0].Col = 0
+		} else if Player.BikeTrail[0].Col < 0 {
+			Player.BikeTrail[0].Col = len(maze[0])
+		}
+
+		for ind, seg := range Player.BikeTrail {
 			if ind != 0 {
-				if Player.Player[0] == seg {
+				if Player.BikeTrail[0] == seg {
 					return Player, true
 				}
 			}
@@ -85,21 +87,21 @@ func playerMovement(Player bike) (bike, bool) {
 func playerDirection(input string) {
 	switch input {
 	case "UP":
-		ServerA.Direction = "UP"
+		ServerA.BikeDirection = "UP"
 	case "DOWN":
-		ServerA.Direction = "DOWN"
+		ServerA.BikeDirection = "DOWN"
 	case "RIGHT":
-		ServerA.Direction = "LEFT"
+		ServerA.BikeDirection = "RIGHT"
 	case "LEFT":
-		ServerA.Direction = "RIGHT"
+		ServerA.BikeDirection = "LEFT"
 	case "w":
-		ServerB.Direction = "UP"
+		ServerB.BikeDirection = "UP"
 	case "s":
-		ServerB.Direction = "DOWN"
+		ServerB.BikeDirection = "DOWN"
 	case "d":
-		ServerB.Direction = "LEFT"
+		ServerB.BikeDirection = "RIGHT"
 	case "a":
-		ServerB.Direction = "RIGHT"
+		ServerB.BikeDirection = "LEFT"
 	}
 }
 
@@ -160,11 +162,11 @@ func printScreen() {
 		fmt.Println()
 	}
 
-	for _,segment := range PlayerA.Player {
+	for _,segment := range PlayerA.BikeTrail {
 		simpleansi.MoveCursor(segment.Row, segment.Col)
 		color.Red("a")
 	}
-	for _,segment := range PlayerB.Player {
+	for _,segment := range PlayerB.BikeTrail {
 		simpleansi.MoveCursor(segment.Row, segment.Col)
 		color.Blue("b")
 	}
