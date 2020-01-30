@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"github.com/danicat/simpleansi"
 	"golang.org/x/net/websocket"
+	"io"
 	"log"
 	"math/rand"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -41,6 +43,7 @@ type inComing struct {
 
 var (
 	maze      []string
+	PlayerID  string
 	PlayerA   bike
 	PlayerB   bike
 	ServerA		bike
@@ -130,6 +133,20 @@ func server(port string) error {
 	return s.ListenAndServe()
 }
 
+func WriteToFile(filename string, data string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.WriteString(file, data)
+	if err != nil {
+		return err
+	}
+	return file.Sync()
+}
+
 // handler registers a new chat client conn;
 // It runs the hub, adds the client to the connection pool
 // and broadcasts received message
@@ -148,7 +165,10 @@ func handler(ws *websocket.Conn, h *hub) {
 				h.removeClient(ws)
 				return
 			}
-			ch <- m.Command
+			//REMOVE SHORTLY
+			err = WriteToFile("result.txt", string(m.Player))
+			// REMOVE
+			ch <- m.Command + "(" + m.Player + ")"
 		}
 	}(input)
 
@@ -180,11 +200,6 @@ func handler(ws *websocket.Conn, h *hub) {
 }
 
 func main() {
-	// Start server (required for both local & networked play)
-	go func() {
-		flag.Parse()
-		log.Fatal(server(*port))
-	}()
 
 	// Load the Maze
 	err := loadMaze("maze.txt")
@@ -205,11 +220,20 @@ func main() {
 		var host string
 		fmt.Scan(&host)
 		if host != "1" {
+			PlayerID = "2"
+			log.Println("Player 2 Joined")
 			fmt.Println("Enter Host IP")
 			fmt.Scan(&serverIP)
 			fmt.Println("Joined host: "+serverIP+". Enter any value to begin.")
 			fmt.Scan(&host)
 		} else {
+			// Start server (required for both local & networked play)
+			go func() {
+				flag.Parse()
+				log.Fatal(server(*port))
+			}()
+			PlayerID = "1"
+			log.Println("Player 1 Joined")
 			serverIP = GetOutboundIP().String()
 			fmt.Println("Host IP is: ", serverIP)
 			fmt.Println("Enter any value to begin.")
@@ -267,8 +291,9 @@ func main() {
 				color.Cyan("Game exited")
 				exit = true
 			}
+
 			m := inComing{
-				Player: "A",
+				Player: PlayerID,
 				Command: inp,
 			}
 			err = websocket.JSON.Send(ws, m)
@@ -351,14 +376,14 @@ func readInput() (string, error) {
 	} else if cnt >= 3 {
 		if buffer[0] == 0x1b && buffer[1] == '[' {
 			switch buffer[2] {
-			case 'A':
-				return "UP", nil
-			case 'B':
-				return "DOWN", nil
-			case 'C':
-				return "RIGHT", nil
-			case 'D':
-				return "LEFT", nil
+			case 'w':
+				return "w", nil
+			case 'a':
+				return "a", nil
+			case 's':
+				return "s", nil
+			case 'd':
+				return "d", nil
 			}
 		}
 	}
@@ -444,24 +469,33 @@ func collisionDetection(user bike, opp sprite) bool {
 	return false
 }
 
-func playerDirection(input string) {
-	switch input {
+func playerDirection(inputed string) {
+	var localDirection string
+	input := strings.Split(inputed, "(")
+
+	switch input[0] {
 	case "UP":
-		ServerA.Direction = "UP"
+		localDirection = "UP"
 	case "DOWN":
-		ServerA.Direction = "DOWN"
+		localDirection = "DOWN"
 	case "RIGHT":
-		ServerA.Direction = "LEFT"
+		localDirection = "LEFT"
 	case "LEFT":
-		ServerA.Direction = "RIGHT"
+		localDirection = "RIGHT"
 	case "w":
-		ServerB.Direction = "UP"
+		localDirection = "UP"
 	case "s":
-		ServerB.Direction = "DOWN"
+		localDirection = "DOWN"
 	case "d":
-		ServerB.Direction = "LEFT"
+		localDirection = "LEFT"
 	case "a":
-		ServerB.Direction = "RIGHT"
+		localDirection = "RIGHT"
+	}
+
+	if strings.Contains(inputed, "1") {
+		ServerA.Direction = localDirection
+	} else {
+		ServerB.Direction = localDirection
 	}
 }
 
