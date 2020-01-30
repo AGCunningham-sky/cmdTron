@@ -25,6 +25,9 @@ func main() {
 			os.Exit(1)
 		}
 
+		initA = ServerA.Player
+		initB = ServerB.Player
+
 		flag.Parse()
 		log.Fatal(server(*port))
 	}()

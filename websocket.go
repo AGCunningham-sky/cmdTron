@@ -150,17 +150,9 @@ func handler(ws *websocket.Conn, h *hub) {
 }
 
 func gameReset() {
-	var resetA, resetB []sprite
-
+	ServerA.Player = initA
 	ServerA.Direction = ""
-	resetA = append(resetA, ServerA.Player[len(ServerA.Player)-1])
-	ServerA.Player = resetA
 
-	fmt.Println(ServerA)
-
+	ServerB.Player = initB
 	ServerB.Direction = ""
-	resetB = append(resetB, ServerB.Player[len(ServerB.Player)-1])
-	ServerB.Player = resetB
-
-	fmt.Println(ServerA, ServerB)
 }

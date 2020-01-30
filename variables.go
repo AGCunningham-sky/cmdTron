@@ -6,17 +6,19 @@ import (
 )
 
 var (
-	maze      []string
-	PlayerA   bike
-	PlayerB   bike
-	ServerA		bike
-	ServerB		bike
-	maxLength = 150
-	exit      bool
-	port      = flag.String("port", "9000", "port used for ws connection")
-	serverIP string
-	mazePath = "maze.txt"
-	startLives = 3
+	maze         []string
+	PlayerB      bike
+	PlayerA      bike
+	ServerB      bike
+	ServerA      bike
+	initA		 []sprite
+	initB 		 []sprite
+	maxLength    = 150
+	exit         bool
+	port         = flag.String("port", "9000", "port used for ws connection")
+	serverIP     string
+	mazePath     = "maze.txt"
+	startLives   = 3
 )
 
 type bike struct {
