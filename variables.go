@@ -16,12 +16,14 @@ var (
 	port      = flag.String("port", "9000", "port used for ws connection")
 	serverIP string
 	mazePath = "maze.txt"
+	startLives = 3
 )
 
 type bike struct {
 	Player 		[]sprite
 	Direction 	string
 	Winner		bool
+	Lives		int
 }
 
 type sprite struct {
@@ -31,6 +33,7 @@ type sprite struct {
 }
 
 type serverToClients struct {
+	//TODO: Figure out why I couldn't change this
 	PlayerA bike
 	PlayerB bike
 }

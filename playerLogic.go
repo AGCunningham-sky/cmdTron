@@ -170,4 +170,6 @@ func printScreen() {
 	}
 
 	simpleansi.MoveCursor(len(maze), 0)
+	fmt.Printf("Arrows: %d \tWASD: %d\n", PlayerA.Lives, PlayerB.Lives)
+	simpleansi.MoveCursor(len(maze)+1, 0)
 }

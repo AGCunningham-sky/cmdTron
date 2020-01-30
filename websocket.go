@@ -95,7 +95,7 @@ func server(port string) error {
 	return s.ListenAndServe()
 }
 
-// handler registers a new chat client conn; runs hub, adds client to conn pool & broadcasts serverToClients
+// controls server-side game logic
 func handler(ws *websocket.Conn, h *hub) {
 	go h.run()
 
@@ -123,21 +123,44 @@ func handler(ws *websocket.Conn, h *hub) {
 		default:
 		}
 
-		var crash bool
+		crash := false
 		var winner string
 		crash, winner = updateLogic(ServerA, ServerB)
 		if crash {
 			switch winner {
 			case "Arrows":
-				ServerA.Winner = true
+				ServerA.Lives--
+				gameReset()
 			case "WASD":
-				ServerB.Winner = true
+				ServerB.Lives--
+				gameReset()
 			default:
-				ServerA.Winner = false
-				ServerB.Winner = false
 			}
 		}
-		h.broadcastChan <- serverToClients{PlayerA: ServerA, PlayerB:ServerB}
+
+		if ServerA.Lives <= 0 {
+			ServerA.Winner = true
+		} else if ServerB.Lives <= 0 {
+			ServerB.Winner = true
+		}
+
+		h.broadcastChan <- serverToClients{ServerA, ServerB}
 		time.Sleep(100*time.Millisecond)
 	}
+}
+
+func gameReset() {
+	var resetA, resetB []sprite
+
+	ServerA.Direction = ""
+	resetA = append(resetA, ServerA.Player[len(ServerA.Player)-1])
+	ServerA.Player = resetA
+
+	fmt.Println(ServerA)
+
+	ServerB.Direction = ""
+	resetB = append(resetB, ServerB.Player[len(ServerB.Player)-1])
+	ServerB.Player = resetB
+
+	fmt.Println(ServerA, ServerB)
 }

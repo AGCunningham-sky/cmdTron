@@ -18,15 +18,16 @@ import (
 func main() {
 	// Start server (required for both local & networked play)
 	go func() {
+		// Load the Maze
+		err := loadMaze(mazePath)
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+
 		flag.Parse()
 		log.Fatal(server(*port))
 	}()
-
-	// Load the Maze
-	err := loadMaze(mazePath)
-	if err != nil {
-		panic(err)
-	}
 
 	var mode string
 	fmt.Println("-- Welcome to Tron --")
@@ -53,6 +54,7 @@ func main() {
 
 	default:
 		fmt.Println("Invalid option. Goodbye.")
+		cleanup()
 		os.Exit(0)
 	}
 
@@ -157,6 +159,9 @@ func loadMaze(file string) error {
 			}
 		}
 	}
+
+	ServerA.Lives = startLives
+	ServerB.Lives = startLives
 
 	return nil
 }
