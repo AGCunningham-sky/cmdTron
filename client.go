@@ -94,32 +94,32 @@ func main() {
 	}(updates)
 
 	for {
-		printScreen()
-
 		select {
-		case inp := <-input:
-			if inp == "ESC" {
-				color.Cyan("Game exited")
-				exit = true
-			}
-			m := inComing{
-				Player: "A",
-				Command: inp,
-			}
-			err = websocket.JSON.Send(ws, m)
-			if err != nil {
-				fmt.Println("Error sending message: ", err.Error())
-				break
-			}
+			case inp := <-input:
+				if inp == "ESC" {
+					color.Cyan("Game exited")
+					exit = true
+				}
+				m := inComing{
+					Player: "A",
+					Command: inp,
+				}
+				err = websocket.JSON.Send(ws, m)
+				if err != nil {
+					fmt.Println("Error sending message: ", err.Error())
+					break
+				}
 			case m:= <- updates:
 				PlayerA = m.PlayerA
 				PlayerB = m.PlayerB
+
+				// Only redraw the screen when the data is updated
+				printScreen()
 		default:
 		}
-		if exit {
-			break
-		}
-		time.Sleep(100 * time.Millisecond)
+
+		//TODO: Not sure if we still need this? Or something else will have to happen to handle crash logic
+		if exit { break }
 	}
 }
 

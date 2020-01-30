@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -99,26 +100,36 @@ func handler(ws *websocket.Conn, h *hub) {
 
 	h.addClientChan <- ws
 
+	input := make(chan string)
+	go func(ch chan<- string) {
+		for {
+			var m inComing
+			err := websocket.JSON.Receive(ws, &m)
+			if err != nil {
+				//h.broadcastChan <- Message{"ERROR",err.Error()}
+				h.removeClient(ws)
+				return
+			}
+			ch <- m.Command
+		}
+	}(input)
+
 	for {
-		var m inComing
-		var crash bool
-		err := websocket.JSON.Receive(ws, &m)
-		if err != nil {
-			//h.broadcastChan <- Message{"ERROR",err.Error()}
-			h.removeClient(ws)
-			return
+		//TODO: Currently it doesn't matter who send the command bceause you still use wasd v arrows
+		select {
+		case m := <-input:
+			playerDirection(m)
+		default:
 		}
 
-		//TODO: Currently it doesn't matter who send the command bceause you still use wasd v arrows
-		playerDirection(m.Command)
-
+		var crash bool
 		crash = updateLogic(PlayerA, PlayerB)
 		if !crash {
 			h.broadcastChan <- Message{PlayerA:PlayerA, PlayerB:PlayerB}
 		} else {
 			log.Println("CRASH")
 		}
-
+		time.Sleep(100*time.Millisecond)
 	}
 }
 
