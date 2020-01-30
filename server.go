@@ -14,8 +14,9 @@ import (
 )
 
 type bike struct {
-	Player []sprite
-	Direction string
+	Player 		[]sprite
+	Direction 	string
+	Winner		bool
 }
 
 type sprite struct {
@@ -25,13 +26,13 @@ type sprite struct {
 }
 
 type Message struct {
-	PlayerA bike `json:"playerA"`
-	PlayerB bike `json:"playerB"`
+	PlayerA bike
+	PlayerB bike
 }
 
 type inComing struct {
-	Player	string `json:"bike"`
-	Command string	`json:"command"`
+	Player	string
+	Command string
 }
 
 type hub struct {
@@ -49,36 +50,6 @@ var (
 
 	port = flag.String("port", "9000", "port used for ws connection")
 )
-
-func main() {
-	loadMaze("maze.txt")
-
-	flag.Parse()
-	log.Fatal(server(*port))
-}
-
-func updateLogic(pA, pB bike) bool {
-	var crash bool
-	if PlayerA, crash = playerMovement(pA); crash {
-		color.Blue("WASD Wins")
-		return true
-	}
-	if PlayerB, crash = playerMovement(pB); crash {
-		color.Red("Arrows Wins")
-		return true
-	}
-
-	if collisionDetection(pA, pB.Player[0]) {
-		color.Red("Arrows Wins")
-		return true
-	}
-	if collisionDetection(pB, pA.Player[0]) {
-		color.Blue("WASD Wins")
-		return true
-	}
-
-	return false
-}
 
 // server creates a websocket server at port <port> and registers the sole handler
 func server(port string) error {
@@ -115,7 +86,7 @@ func handler(ws *websocket.Conn, h *hub) {
 	}(input)
 
 	for {
-		//TODO: Currently it doesn't matter who send the command bceause you still use wasd v arrows
+		//TODO: Currently it doesn't matter who send the command because you still use 'wasd' v arrows
 		select {
 		case m := <-input:
 			playerDirection(m)
@@ -123,59 +94,49 @@ func handler(ws *websocket.Conn, h *hub) {
 		}
 
 		var crash bool
-		crash = updateLogic(PlayerA, PlayerB)
-		if !crash {
-			h.broadcastChan <- Message{PlayerA:PlayerA, PlayerB:PlayerB}
-		} else {
-			log.Println("CRASH")
+		var winner string
+		crash, winner = updateLogic(PlayerA, PlayerB)
+		if crash {
+			switch winner {
+			case "Arrows":
+				PlayerA.Winner = true
+			case "WASD":
+				PlayerB.Winner = true
+			default:
+				PlayerA.Winner = false
+				PlayerB.Winner = false
+			}
 		}
+		h.broadcastChan <- Message{PlayerA:PlayerA, PlayerB:PlayerB}
 		time.Sleep(100*time.Millisecond)
 	}
 }
 
-// newHub returns a new hub object
-func newHub() *hub {
-	return &hub{
-		clients:          make(map[string]*websocket.Conn),
-		addClientChan:    make(chan *websocket.Conn),
-		removeClientChan: make(chan *websocket.Conn),
-		broadcastChan:    make(chan Message),
+func main() {
+	loadMaze("maze.txt")
+
+	flag.Parse()
+	log.Fatal(server(*port))
+}
+
+func updateLogic(pA, pB bike) (bool, string) {
+	var crash bool
+	if PlayerA, crash = playerMovement(pA); crash {
+		return true, "WASD"
 	}
-}
-
-// run receives from the hub channels and calls the appropriate hub method
-func (h *hub) run() {
-	for {
-		select {
-		case conn := <-h.addClientChan:
-			h.addClient(conn)
-		case conn := <-h.removeClientChan:
-			h.removeClient(conn)
-		case m := <-h.broadcastChan:
-			h.broadcastMessage(m)
-		}
+	if PlayerB, crash = playerMovement(pB); crash {
+		return true, "Arrows"
 	}
-}
 
-// removeClient removes a conn from the pool
-func (h *hub) removeClient(conn *websocket.Conn) {
-	delete(h.clients, conn.LocalAddr().String())
-}
-
-// addClient adds a conn to the pool
-func (h *hub) addClient(conn *websocket.Conn) {
-	h.clients[conn.RemoteAddr().String()] = conn
-}
-
-// broadcastMessage sends a message to all client conns in the pool
-func (h *hub) broadcastMessage(m Message) {
-	for _, conn := range h.clients {
-		err := websocket.JSON.Send(conn, m)
-		if err != nil {
-			fmt.Println("Error broadcasting message: ", err)
-			return
-		}
+	if collisionDetection(pA, pB.Player[0]) {
+		color.Red("Arrows Wins")
+		return true, "Arrows"
 	}
+	if collisionDetection(pB, pA.Player[0]) {
+		return true, "WASD"
+	}
+
+	return false, ""
 }
 
 func loadMaze(file string) error {
@@ -275,4 +236,49 @@ func playerMovement(Player bike) (bike, bool) {
 		}
 	}
 	return Player, false
+}
+
+// newHub returns a new hub object
+func newHub() *hub {
+	return &hub{
+		clients:          make(map[string]*websocket.Conn),
+		addClientChan:    make(chan *websocket.Conn),
+		removeClientChan: make(chan *websocket.Conn),
+		broadcastChan:    make(chan Message),
+	}
+}
+
+// run receives from the hub channels and calls the appropriate hub method
+func (h *hub) run() {
+	for {
+		select {
+		case conn := <-h.addClientChan:
+			h.addClient(conn)
+		case conn := <-h.removeClientChan:
+			h.removeClient(conn)
+		case m := <-h.broadcastChan:
+			h.broadcastMessage(m)
+		}
+	}
+}
+
+// removeClient removes a conn from the pool
+func (h *hub) removeClient(conn *websocket.Conn) {
+	delete(h.clients, conn.LocalAddr().String())
+}
+
+// addClient adds a conn to the pool
+func (h *hub) addClient(conn *websocket.Conn) {
+	h.clients[conn.RemoteAddr().String()] = conn
+}
+
+// broadcastMessage sends a message to all client conns in the pool
+func (h *hub) broadcastMessage(m Message) {
+	for _, conn := range h.clients {
+		err := websocket.JSON.Send(conn, m)
+		if err != nil {
+			fmt.Println("Error broadcasting message: ", err)
+			return
+		}
+	}
 }

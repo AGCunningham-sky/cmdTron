@@ -16,8 +16,9 @@ import (
 )
 
 type bike struct {
-	Player []sprite
-	Direction string
+	Player 		[]sprite
+	Direction 	string
+	Winner		bool
 }
 
 type sprite struct {
@@ -27,13 +28,13 @@ type sprite struct {
 }
 
 type Message struct {
-	PlayerA bike `json:"playerA"`
-	PlayerB bike `json:"playerB"`
+	PlayerA bike
+	PlayerB bike
 }
 
 type inComing struct {
-	Player	string `json:"bike"`
-	Command string	`json:"command"`
+	Player	string
+	Command string
 }
 
 var (
@@ -45,6 +46,21 @@ var (
 	port      = flag.String("port", "9000", "port used for ws connection")
 	serverIP  = "10.190.159.32"
 )
+
+// connect connects to the local chat server at port <port>
+func connect() (*websocket.Conn, error) {
+	return websocket.Dial(fmt.Sprintf("ws://"+serverIP+":%s", *port), "", mockedIP())
+}
+
+// mockedIP is a demo-only utility that generates a random IP address for this client
+func mockedIP() string {
+	var arr [4]int
+	for i := 0; i < 4; i++ {
+		rand.Seed(time.Now().UnixNano())
+		arr[i] = rand.Intn(256)
+	}
+	return fmt.Sprintf("http://%d.%d.%d.%d", arr[0], arr[1], arr[2], arr[3])
+}
 
 func main() {
 	initialise()
@@ -80,7 +96,6 @@ func main() {
 	}(input)
 
 	updates := make(chan Message)
-	// receive
 	go func(ch chan<- Message) {
 		for {
 			var m Message
@@ -95,47 +110,39 @@ func main() {
 
 	for {
 		select {
-			case inp := <-input:
-				if inp == "ESC" {
-					color.Cyan("Game exited")
-					exit = true
-				}
-				m := inComing{
-					Player: "A",
-					Command: inp,
-				}
-				err = websocket.JSON.Send(ws, m)
-				if err != nil {
-					fmt.Println("Error sending message: ", err.Error())
-					break
-				}
-			case m:= <- updates:
-				PlayerA = m.PlayerA
-				PlayerB = m.PlayerB
+		case inp := <-input:
+			if inp == "ESC" {
+				color.Cyan("Game exited")
+				exit = true
+			}
+			m := inComing{
+				Player: "A",
+				Command: inp,
+			}
+			err = websocket.JSON.Send(ws, m)
+			if err != nil {
+				fmt.Println("Error sending message: ", err.Error())
+				break
+			}
+		case m:= <- updates:
+			PlayerA = m.PlayerA
+			PlayerB = m.PlayerB
 
-				// Only redraw the screen when the data is updated
-				printScreen()
+			// Only redraw the screen when the data is updated
+			printScreen()
 		default:
 		}
 
-		//TODO: Not sure if we still need this? Or something else will have to happen to handle crash logic
-		if exit { break }
+		if PlayerA.Winner {
+			color.Red("Arrows Win!")
+			break
+		} else if PlayerB.Winner {
+			color.Blue("WASD Win!")
+			break
+		} else if exit {
+			break
+		}
 	}
-}
-
-// connect connects to the local chat server at port <port>
-func connect() (*websocket.Conn, error) {
-	return websocket.Dial(fmt.Sprintf("ws://"+serverIP+":%s", *port), "", mockedIP())
-}
-
-// mockedIP is a demo-only utility that generates a random IP address for this client
-func mockedIP() string {
-	var arr [4]int
-	for i := 0; i < 4; i++ {
-		rand.Seed(time.Now().UnixNano())
-		arr[i] = rand.Intn(256)
-	}
-	return fmt.Sprintf("http://%d.%d.%d.%d", arr[0], arr[1], arr[2], arr[3])
 }
 
 func loadMaze(file string) error {
