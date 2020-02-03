@@ -25,7 +25,6 @@ var (
 type bike struct {
 	BikeTrail     []sprite
 	BikeDirection string
-	Winner        bool
 	Lives         int
 }
 

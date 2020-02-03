@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 )
 
 func main() {
@@ -128,16 +129,16 @@ func main() {
 		default:
 		}
 
-		if PlayerA.Winner {
-			color.Red("Arrows Win!")
-			break
-		} else if PlayerB.Winner {
-			color.Blue("WASD Win!")
-			break
-		} else if exit {
+		if exit {
 			break
 		}
 	}
+}
+
+func resetGame() {
+	color.Blue("Press 'ESC' to end game or wait 2 seconds to restart")
+	time.Sleep(2 * time.Second)
+
 }
 
 // load the maze from file

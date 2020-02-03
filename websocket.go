@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"golang.org/x/net/websocket"
 	"log"
 	"math/rand"
@@ -138,9 +139,19 @@ func handler(ws *websocket.Conn, h *hub) {
 		}
 
 		if ServerA.Lives <= 0 {
-			ServerB.Winner = true
+			color.Red("Arrows Win! - 'ESC to exit or wait 2 seconds to restart")
+			time.Sleep(2 * time.Second)
+
+			ServerA.Lives = startLives
+			ServerB.Lives = startLives
+			gameReset()
 		} else if ServerB.Lives <= 0 {
-			ServerA.Winner = true
+			color.Blue("WASD Win! - 'ESC to exit or wait 2 seconds to restart")
+			time.Sleep(2 * time.Second)
+
+			ServerA.Lives = startLives
+			ServerB.Lives = startLives
+			gameReset()
 		}
 
 		h.broadcastChan <- serverToClients{ServerA, ServerB}
