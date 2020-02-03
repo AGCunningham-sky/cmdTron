@@ -101,8 +101,8 @@ func handler(ws *websocket.Conn, h *hub) {
 
 	h.addClientChan <- ws
 
-	input := make(chan string)
-	go func(ch chan<- string) {
+	input := make(chan clientToServer)
+	go func(ch chan<- clientToServer) {
 		for {
 			var m clientToServer
 			err := websocket.JSON.Receive(ws, &m)
@@ -111,12 +111,11 @@ func handler(ws *websocket.Conn, h *hub) {
 				h.removeClient(ws)
 				return
 			}
-			ch <- m.Command
+			ch <- m
 		}
 	}(input)
 
 	for {
-		//TODO: Currently it doesn't matter who send the command because you still use 'wasd' v arrows
 		select {
 		case m := <-input:
 			playerDirection(m)

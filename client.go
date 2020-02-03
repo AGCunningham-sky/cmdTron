@@ -16,6 +16,8 @@ import (
 )
 
 func main() {
+	//TODO: Make it so more players adding can dynamically increase the number of bikes
+
 	// Start server (required for both local & networked play)
 	go func() {
 		// Load the Maze
@@ -44,11 +46,13 @@ func main() {
 		var host string
 		fmt.Scan(&host)
 		if host != "1" {
+			dirControl = "host"
 			fmt.Println("Enter Host IP")
 			fmt.Scan(&serverIP)
 			fmt.Println("Joined host: "+serverIP+". Enter any value to begin.")
 			fmt.Scan(&host)
 		} else {
+			dirControl = "slave"
 			serverIP = getOutboundIP().String()
 			fmt.Println("Host IP is: ", serverIP)
 			fmt.Println("Enter any value to begin.")
@@ -107,7 +111,7 @@ func main() {
 				exit = true
 			}
 			m := clientToServer{
-				Player: "A",
+				Player: dirControl,
 				Command: inp,
 			}
 			err = websocket.JSON.Send(ws, m)

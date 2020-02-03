@@ -84,25 +84,46 @@ func playerMovement(Player bike) (bike, bool) {
 }
 
 // updates player direction based on input
-func playerDirection(input string) {
-	switch input {
-	case "UP":
-		ServerA.BikeDirection = "UP"
-	case "DOWN":
-		ServerA.BikeDirection = "DOWN"
-	case "RIGHT":
-		ServerA.BikeDirection = "RIGHT"
-	case "LEFT":
-		ServerA.BikeDirection = "LEFT"
-	case "w":
-		ServerB.BikeDirection = "UP"
-	case "s":
-		ServerB.BikeDirection = "DOWN"
-	case "d":
-		ServerB.BikeDirection = "RIGHT"
-	case "a":
-		ServerB.BikeDirection = "LEFT"
+func playerDirection(input clientToServer) {
+	if input.Player == "host" {
+		ServerA = dirSet(ServerA, input.Command)
+	} else if input.Player == "slave" {
+		ServerB = dirSet(ServerB, input.Command)
+	} else {
+		switch input.Command {
+		case "UP":
+			ServerA.BikeDirection = "UP"
+		case "DOWN":
+			ServerA.BikeDirection = "DOWN"
+		case "RIGHT":
+			ServerA.BikeDirection = "RIGHT"
+		case "LEFT":
+			ServerA.BikeDirection = "LEFT"
+		case "w":
+			ServerB.BikeDirection = "UP"
+		case "s":
+			ServerB.BikeDirection = "DOWN"
+		case "d":
+			ServerB.BikeDirection = "RIGHT"
+		case "a":
+			ServerB.BikeDirection = "LEFT"
+		}
 	}
+}
+
+func dirSet(input bike, command string) bike {
+	output := input
+	switch command {
+		case "UP", "w":
+			input.BikeDirection = "UP"
+		case "DOWN", "s":
+			input.BikeDirection = "DOWN"
+		case "RIGHT", "d":
+			input.BikeDirection = "RIGHT"
+		case "LEFT", "a":
+			input.BikeDirection = "LEFT"
+	}
+	return output
 }
 
 // read input from keyboard

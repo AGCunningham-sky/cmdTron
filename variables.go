@@ -19,6 +19,7 @@ var (
 	serverIP     string
 	mazePath     = "maze.txt"
 	startLives   = 3
+	dirControl	string
 )
 
 type bike struct {
