@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 )
 
 func main() {
@@ -127,8 +128,13 @@ func main() {
 			printScreen()
 		default:
 		}
-
-		if exit {
+		if PlayerA.Winner {
+			color.Red("Arrows Win! - 'ESC to exit or wait 2 seconds to restart")
+			time.Sleep(2 * time.Second)
+		} else if PlayerB.Winner {
+			color.Blue("WASD Win! - 'ESC to exit or wait 2 seconds to restart")
+			time.Sleep(2 * time.Second)
+		} else if exit {
 			break
 		}
 	}

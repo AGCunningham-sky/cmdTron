@@ -26,6 +26,7 @@ type bike struct {
 	BikeTrail     []sprite
 	BikeDirection string
 	Lives         int
+	Winner		  bool
 }
 
 type sprite struct {
