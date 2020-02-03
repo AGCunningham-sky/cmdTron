@@ -13,7 +13,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"time"
 )
 
 func main() {
@@ -133,12 +132,6 @@ func main() {
 			break
 		}
 	}
-}
-
-func resetGame() {
-	color.Blue("Press 'ESC' to end game or wait 2 seconds to restart")
-	time.Sleep(2 * time.Second)
-
 }
 
 // load the maze from file

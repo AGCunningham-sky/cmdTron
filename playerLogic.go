@@ -114,14 +114,14 @@ func playerDirection(input clientToServer) {
 func dirSet(input bike, command string) bike {
 	output := input
 	switch command {
-		case "UP", "w":
-			input.BikeDirection = "UP"
-		case "DOWN", "s":
-			input.BikeDirection = "DOWN"
-		case "RIGHT", "d":
-			input.BikeDirection = "RIGHT"
-		case "LEFT", "a":
-			input.BikeDirection = "LEFT"
+		case "UP":
+			output.BikeDirection = "UP"
+		case "DOWN":
+			output.BikeDirection = "DOWN"
+		case "RIGHT":
+			output.BikeDirection = "RIGHT"
+		case "LEFT":
+			output.BikeDirection = "LEFT"
 	}
 	return output
 }
